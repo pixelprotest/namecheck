@@ -1,8 +1,11 @@
+import os
 import sys
+import pickle
 import difflib
 import requests
 from bs4 import BeautifulSoup
 from collections import defaultdict
+from platformdirs import user_cache_dir
 
 # URLs for the simple package indexes
 SOURCES = {
@@ -10,11 +13,44 @@ SOURCES = {
     'TestPyPI': 'https://test.pypi.org/'
 }
 
+def load_package_names_from_cache():
+    """
+    Loads the package names from the cache.
+    """
+    cache_dir = user_cache_dir('namecheck')
+    cache_file = os.path.join(cache_dir, 'package_names.pkl')
+    if os.path.exists(cache_file) and os.path.getsize(cache_file) > 0:
+        try:
+            with open(cache_file, 'rb') as f:
+                package_names = pickle.load(f)
+            # Convert defaultdict to regular dict to prevent auto-creation of keys
+            return dict(package_names)
+        except (pickle.UnpicklingError, EOFError, ValueError) as e:
+            # Cache file is corrupted, ignore it and return None
+            print(f"Warning: Cache file is corrupted, will refresh from source.", file=sys.stderr)
+            return None
+    return None
+
+def save_package_names_to_cache(package_names):
+    """
+    Saves the package names to the cache.
+    """
+    cache_dir = user_cache_dir('namecheck')
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, 'package_names.pkl')
+    with open(cache_file, 'wb') as f:
+        pickle.dump(package_names, f)
+
 def get_all_package_names():
     """
     Fetches and parses package names from the given source URLs.
     Returns a dictionary mapping package names to a set of their sources.
     """
+    ## check if the package names are already in the cache
+    package_names = load_package_names_from_cache()
+    if package_names:
+        return dict(package_names)
+
     package_names = defaultdict(set)
     for source_name, url in SOURCES.items():
         index_url = url + 'simple/'
@@ -32,7 +68,10 @@ def get_all_package_names():
                 
         except requests.RequestException as e:
             print(f"Error fetching data from {index_url}: {e}", file=sys.stderr)
-            
+
+    ## save the package names to the cache
+    save_package_names_to_cache(package_names)
+
     print(f"\nFound {len(package_names)} unique package names across all sources.", file=sys.stderr)
     return dict(package_names)
 
