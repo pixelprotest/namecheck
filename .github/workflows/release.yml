@@ -1,0 +1,190 @@
+name: release [date]
+
+on:
+  workflow_dispatch:
+    inputs:
+      pre_release:
+        description: 'Is this a pre-release (e.g., 2025.11.10rc1)?'
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install build
+
+    - name: Generate version from date
+      id: version
+      run: |
+        # Format: YYYY.MM.DD
+        BASE_VERSION=$(date +%Y.%m.%d)
+        
+        if [[ "${{ github.event.inputs.pre_release }}" == "true" ]]; then
+          # Pre-release logic: find next rc number (e.g., 2025.11.10rc1)
+          COUNTER=1
+          while git rev-parse "v${BASE_VERSION}rc${COUNTER}" >/dev/null 2>&1; do
+            COUNTER=$((COUNTER + 1))
+          done
+          VERSION="${BASE_VERSION}rc${COUNTER}"
+        else
+          # Final release logic: find next patch number if base tag exists (e.g., 2025.11.10 or 2025.11.10.1)
+          VERSION="$BASE_VERSION"
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            COUNTER=1
+            while git rev-parse "v$VERSION.$COUNTER" >/dev/null 2>&1; do
+              COUNTER=$((COUNTER + 1))
+            done
+            VERSION="$VERSION.$COUNTER"
+          fi
+        fi
+        
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Generated version: $VERSION"
+
+    - name: Debug version
+      run: |
+        echo "Generated version is: ${{ steps.version.outputs.version }}"
+        git tag -l "v2025.11.10*"
+
+    - name: Update version in pyproject.toml
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        sed -i "s/^version = \".*\"/version = \"$VERSION\"/" pyproject.toml
+        echo "Updated version to: $VERSION"
+        cat pyproject.toml | grep "^version"
+
+    - name: Build distribution
+      run: python -m build
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit version bump
+      run: |
+        git add pyproject.toml
+        git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+        git push
+
+    - name: Generate release notes from commits
+      id: notes
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        IS_PRE_RELEASE="${{ github.event.inputs.pre_release }}"
+        
+        if [[ "$IS_PRE_RELEASE" == "true" ]]; then
+          # For pre-releases, the range is since the last tag of any kind
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        else
+          # For final releases, find the last *final* release tag, ignoring pre-releases
+          LAST_TAG=$(git tag -l --sort=-v:refname | grep -v 'rc' | head -n 1)
+        fi
+        
+        if [ -z "$LAST_TAG" ]; then
+          RANGE="HEAD"
+        else
+          RANGE="${LAST_TAG}..HEAD"
+        fi
+        
+        # Function to get GitHub username from commit hash
+        get_github_user() {
+          local commit_hash="$1"
+          gh api repos/${{ github.repository }}/commits/$commit_hash --jq '.author.login // "unknown"' 2>/dev/null || echo "unknown"
+        }
+        
+        # Get categorized commits with hash
+        ALL_COMMITS=$(git log $RANGE --pretty=format:"%s|%h" --no-merges)
+        
+        # Build notes
+        echo "## What's Changed" > release_notes.md
+        echo "" >> release_notes.md
+        
+        # Process features
+        FEATURES=$(echo "$ALL_COMMITS" | grep -iE "^(feat|feature)" || true)
+        if [ ! -z "$FEATURES" ]; then
+          echo "### 🎉 New Features" >> release_notes.md
+          while IFS='|' read -r message hash; do
+            user=$(get_github_user "$hash")
+            clean_msg=$(echo "$message" | sed -E 's/^(feat|feature):\s*//')
+            echo "* $clean_msg (\`$hash\`) by @$user" >> release_notes.md
+          done <<< "$FEATURES"
+          echo "" >> release_notes.md
+        fi
+        
+        # Process fixes
+        FIXES=$(echo "$ALL_COMMITS" | grep -iE "^fix" || true)
+        if [ ! -z "$FIXES" ]; then
+          echo "### 🐛 Bug Fixes" >> release_notes.md
+          while IFS='|' read -r message hash; do
+            user=$(get_github_user "$hash")
+            clean_msg=$(echo "$message" | sed -E 's/^fix:\s*//')
+            echo "* $clean_msg (\`$hash\`) by @$user" >> release_notes.md
+          done <<< "$FIXES"
+          echo "" >> release_notes.md
+        fi
+        
+        # Process docs
+        DOCS=$(echo "$ALL_COMMITS" | grep -iE "^docs" || true)
+        if [ ! -z "$DOCS" ]; then
+          echo "### 📚 Documentation" >> release_notes.md
+          while IFS='|' read -r message hash; do
+            user=$(get_github_user "$hash")
+            clean_msg=$(echo "$message" | sed -E 's/^docs:\s*//')
+            echo "* $clean_msg (\`$hash\`) by @$user" >> release_notes.md
+          done <<< "$DOCS"
+          echo "" >> release_notes.md
+        fi
+        
+        # Process other changes (excluding chore)
+        OTHER=$(echo "$ALL_COMMITS" | grep -viE "^(feat|feature|fix|docs|chore)" || true)
+        if [ ! -z "$OTHER" ]; then
+          echo "<details>" >> release_notes.md
+          echo "<summary>Other Changes</summary>" >> release_notes.md
+          echo "" >> release_notes.md
+          while IFS='|' read -r message hash; do
+            user=$(get_github_user "$hash")
+            echo "* $message (\`$hash\`) by @$user" >> release_notes.md
+          done <<< "$OTHER"
+          echo "" >> release_notes.md
+          echo "</details>" >> release_notes.md
+          echo "" >> release_notes.md
+        fi
+        
+        echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${LAST_TAG}...v${VERSION}" >> release_notes.md
+
+    - name: Create tag and release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        git tag "v$VERSION"
+        git push origin "v$VERSION"
+        
+        PRERELEASE_FLAG=""
+        if [[ "${{ github.event.inputs.pre_release }}" == "true" ]]; then
+          PRERELEASE_FLAG="--prerelease"
+        fi
+        
+        gh release create "v$VERSION" \
+          --title "namecheck v$VERSION" \
+          --notes-file release_notes.md \
+          $PRERELEASE_FLAG \
+          dist/*
