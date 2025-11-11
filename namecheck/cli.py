@@ -5,6 +5,7 @@ from namecheck.utils import (get_all_package_names,
                              get_name_availability)
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
+from rich.style import Style
 from namecheck.render.utils import clear_previous_lines, print_text
 
 console = Console()
@@ -21,16 +22,17 @@ def main():
     while True:
         try:
             console.clear()
-            console.print(f"[bold]Enter a package name to check. Type [bold {PINK}]'q'[/] or [bold {PINK}]'exit'[/] to quit.[/]")
+            console.print(f"[{PURPLE}]Enter a package name to check. Type [bold {PINK}]'q'[/] or [bold {PINK}]'exit'[/] to quit.[/]")
             check_another_name = False
             # user_input = input("\n> Check name: ")
-            user_input = Prompt.ask(f"\n[bold]> Check name[/]", console=console)
+            user_input = Prompt.ask(f"\n[{PURPLE}]package name[/]", console=console)
             if user_input.lower() in ['q', 'exit']:
                 break
             if user_input:
                 clear_previous_lines(3)
                 print_text(f"Name availability for '{user_input}'", console=console)
                 is_available, taken_sources, close_matches = get_name_availability(user_input, all_package_names)
+                clear_previous_lines(2)
                 render_name_availability(user_input, 
                                          is_available, 
                                          taken_sources, 
@@ -38,7 +40,9 @@ def main():
                                          all_package_names, 
                                          console=console)
                 # check_name_availability(user_input, all_package_names)
-                check_another_name = Confirm.ask(f"\n[bold]Do you want to check another name?[/]", console=console)
+                style = Style(color=PURPLE, blink=False, bold=False)
+                res = Prompt.ask(f"\n[{PURPLE}]Would you like to check another name?[/] \[[bold {PINK}]y[/]/[bold {PINK}]n[/]]", console=console)
+                check_another_name = True if res.lower() in ['y', 'yes'] else False
                 if check_another_name:
                     continue
                 else:

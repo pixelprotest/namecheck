@@ -1,7 +1,8 @@
 PINK = "orchid2"
 PURPLE = "blue1"
-CHECK = "[green]✓[/]"
-CROSS = "[red]✗[/]"
+CHECK = "[bold green]✓[/]"
+CROSS = "[bold red]💀[/]"
+BOLT = "[bold yellow]💀[/]"
 INDENT = " " * 3
 QMARK_PREFIX = INDENT + "?"
 INDENT_Q_NEWLINE = "\n" + INDENT + "  "

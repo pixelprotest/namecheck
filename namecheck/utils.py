@@ -9,7 +9,7 @@ from collections import defaultdict
 from platformdirs import user_cache_dir
 from namecheck.render.utils import spinner
 from namecheck.render.utils import print_text
-from namecheck.render.const import PINK, PURPLE
+from namecheck.render.const import PINK, PURPLE, CHECK, CROSS
 from rich.style import Style
 
 # URLs for the simple package indexes
@@ -182,7 +182,6 @@ def get_name_availability(name, all_names_with_sources) -> tuple[bool, list[str]
     return is_available, taken_sources, close_matches
 
 def render_name_availability(name, is_available, taken_sources, close_matches, all_names_with_sources, console: Console):
-    print('-' * 50)
     if is_available:
         print_available(name, console)
     else:
@@ -190,22 +189,22 @@ def render_name_availability(name, is_available, taken_sources, close_matches, a
 
     if close_matches:
         print_matches(close_matches, all_names_with_sources, console)
-    print('-' * 50)
 
 
 ## --- print output functions ---
 def print_available(name: str, console: Console):
     plain_style = Style(color=PURPLE, blink=True, bold=False)
-    console.print(f"✅ The name [bold {PINK}]'{name}'[/] appears to be [bold {PINK}]available![/]", style=plain_style)
-    # print_text(f"✅ The name '{name}' appears to be [bold green]available![/]", console=console)
+    console.print(f"The name [bold {PINK}]'{name}'[/] appears to be [bold {PINK}]available![/]", style=plain_style)
 
 def print_taken(name: str, source: list[str], console: Console):
+    sources = [f"[bold {PINK}]{source}[/]" for source in source]
     sources = ", ".join(sorted(source))
-    print_text(f"❌ Exact match for '{name}' found on: {sources}", console=console)
+    print_text(f"The name [bold {PINK}]'{name}'[/] is already taken on: {sources}", console=console)
 
 def print_matches(matches: list[str], all_names_with_sources: dict[str, set[str]], console: Console):
     plain_style = Style(color=PURPLE, blink=False, bold=False)
-    console.print("\n⚠️  Found closely matching package names:", style=plain_style)
+    console.print("\nFound closely matching package names:", style=plain_style)
     for match in matches:
-        sources = ", ".join(sorted(list(all_names_with_sources[match])))
+        sources = [f"[{PINK}]{source}[/]" for source in sorted(list(all_names_with_sources[match]))]
+        sources = ", ".join(sources)
         console.print(f"   - [bold {PINK}]{match}[/] (on: {sources})", style=plain_style)
