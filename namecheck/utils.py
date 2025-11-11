@@ -3,15 +3,21 @@ import sys
 import pickle
 import difflib
 import requests
+from rich.console import Console
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from platformdirs import user_cache_dir
+from namecheck.render.utils import spinner
+from namecheck.render.const import GREEN, RED, ORANGE, BLUE
+from rich.style import Style
 
 # URLs for the simple package indexes
 SOURCES = {
     'PyPI': 'https://pypi.org/',
     'TestPyPI': 'https://test.pypi.org/'
 }
+
+basic_style = Style(color=BLUE, blink=False, bold=False)
 
 def load_package_names_from_cache():
     """
@@ -140,47 +146,62 @@ def get_close_matches(name, all_names_with_sources) -> list:
         matches.remove(name_norm)
     return matches
 
-def check_name_availability(name, all_names_with_sources):
+@spinner("Checking...")
+def get_name_availability(name, all_names_with_sources) -> tuple[bool, list[str], list[str]]:
     """
     Checks for an exact match and finds close matches, showing their sources.
     """
-    print("-" * 50)
-    
+    is_available = None
+    taken_sources = []
+    close_matches = []
+
     ## check for exact match in the global index
     exact_match = is_name_taken_global_index(name, all_names_with_sources)
     if exact_match:
         sources = get_sources_for_name(name, all_names_with_sources)
-        print_taken(name, sources)
+        is_available = False
+        taken_sources = sources
     else:
         ## in this case, it _could_ mean the name is available, but
         ## the cachec might be outdated, so lets do a direct url check
         ## to make sure
         is_taken = is_name_taken_project_url(name)
         if is_taken:
-            sources = is_taken
-            print_taken(name, is_taken)
+            is_available = False
+            taken_sources = is_taken
         else:
-            print_available(name)
+            is_available = True
+            taken_sources = []
     
-    close_matches = get_close_matches(name, all_names_with_sources)
+    matches = get_close_matches(name, all_names_with_sources)
     ## if there are close matches, display them
-    if close_matches:
-        print_matches(close_matches, all_names_with_sources)
-            
-    print("-" * 50)
+    if matches:
+        close_matches = matches
 
+    return is_available, taken_sources, close_matches
+
+def render_name_availability(name, is_available, taken_sources, close_matches, all_names_with_sources, console: Console):
+    if is_available:
+        print_available(name, console)
+    else:
+        print_taken(name, taken_sources, console)
+
+    if close_matches:
+        print_matches(close_matches, all_names_with_sources, console)
 
 
 ## --- print output functions ---
-def print_available(name: str):
-    print(f"✅ The name '{name}' appears to be available!")
+def print_available(name: str, console: Console):
+    console.print(f"The name [bold {GREEN}]'{name}'[/] appears to be [bold {GREEN}]available![/]", style=basic_style)
 
-def print_taken(name: str, source: list[str]):
-    sources = ", ".join(sorted(source))
-    print(f"❌ Exact match for '{name}' found on: {sources}")
+def print_taken(name: str, sources: list[str], console: Console):
+    sources_w_color = [f"[bold {RED}]{x}[/]" for x in sources]
+    sources_str = ", ".join(sorted(sources_w_color))
+    console.print(f"The name [bold {RED}]'{name}'[/] is already taken on: {sources_str}", style=basic_style)
 
-def print_matches(matches: list[str], all_names_with_sources: dict[str, set[str]]):
-    print("\n⚠️  Found closely matching package names:")
+def print_matches(matches: list[str], all_names_with_sources: dict[str, set[str]], console: Console):
+    console.print("\nFound closely matching package names:", style=basic_style)
     for match in matches:
-        sources = ", ".join(sorted(list(all_names_with_sources[match])))
-        print(f"   - {match} (on: {sources})")
+        sources = [f"[{ORANGE}]{source}[/]" for source in sorted(list(all_names_with_sources[match]))]
+        sources = ", ".join(sources)
+        console.print(f"   - [bold {ORANGE}]{match}[/] (on: {sources})", style=basic_style)
