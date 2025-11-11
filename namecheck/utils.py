@@ -4,13 +4,19 @@ import requests
 from bs4 import BeautifulSoup
 from collections import defaultdict
 
-def get_all_package_names(sources):
+# URLs for the simple package indexes
+SOURCES = {
+    'PyPI': 'https://pypi.org/simple/',
+    'TestPyPI': 'https://test.pypi.org/simple/'
+}
+
+def get_all_package_names():
     """
     Fetches and parses package names from the given source URLs.
     Returns a dictionary mapping package names to a set of their sources.
     """
     package_names = defaultdict(set)
-    for source_name, url in sources.items():
+    for source_name, url in SOURCES.items():
         try:
             print(f"Fetching package list from {source_name} ({url})...", file=sys.stderr)
             response = requests.get(url, timeout=30)
