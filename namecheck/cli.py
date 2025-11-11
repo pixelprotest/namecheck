@@ -2,17 +2,12 @@ import sys
 from namecheck.utils import (get_all_package_names, 
                               check_name_availability)
 
-# URLs for the simple package indexes
-SOURCES = {
-    'PyPI': 'https://pypi.org/simple/',
-    'TestPyPI': 'https://test.pypi.org/simple/'
-}
 
 def main():
     """
     Main function to run the package name checker.
     """
-    all_package_names = get_all_package_names(SOURCES)
+    all_package_names = get_all_package_names()
     
     if not all_package_names:
         print("Could not retrieve any package names. Exiting.", file=sys.stderr)
