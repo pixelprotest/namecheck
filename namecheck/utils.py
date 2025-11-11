@@ -62,10 +62,27 @@ def is_name_taken_project_url(name) -> list:
     """
     sources = []
     for source_name, url in SOURCES.items():
-        project_url = f"{url}/project/{name}/"
-        response = requests.get(project_url, timeout=30)
-        if response.status_code == 200:
-            sources.append(source_name)
+        project_url = f"{url}project/{name}/"
+        try:
+            response = requests.get(project_url, timeout=30)
+            if response.status_code == 200:
+                # PyPI returns 200 even for non-existent packages
+                # Look for indicators that the package actually exists
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Check if the error message is present
+                page_text = soup.get_text().lower()
+                if "couldn't find this page" in page_text or "not found" in page_text:
+                    # Package doesn't exist
+                    continue
+                
+                # Look for positive indicators (like package description, download buttons, etc.)
+                # PyPI has specific elements for real package pages
+                if soup.find('div', class_='package-header') or soup.find('div', class_='project-description'):
+                    sources.append(source_name)
+        except requests.RequestException as e:
+            # If there's a network error, we can't determine if it's taken
+            print(f"Warning: Could not check {source_name} for '{name}': {e}", file=sys.stderr)
     return sources
     
 def get_close_matches(name, all_names_with_sources) -> list:
