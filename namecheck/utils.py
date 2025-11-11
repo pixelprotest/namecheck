@@ -46,10 +46,10 @@ def get_all_package_names():
     Fetches and parses package names from the given source URLs.
     Returns a dictionary mapping package names to a set of their sources.
     """
-    # ## check if the package names are already in the cache
-    # package_names = load_package_names_from_cache()
-    # if package_names:
-    #     return package_names
+    ## check if the package names are already in the cache
+    package_names = load_package_names_from_cache()
+    if package_names:
+        return dict(package_names)
 
     package_names = defaultdict(set)
     for source_name, url in SOURCES.items():
@@ -69,19 +69,18 @@ def get_all_package_names():
         except requests.RequestException as e:
             print(f"Error fetching data from {index_url}: {e}", file=sys.stderr)
 
-    # ## save the package names to the cache
-    # save_package_names_to_cache(package_names)
-            
+    ## save the package names to the cache
+    save_package_names_to_cache(package_names)
+
     print(f"\nFound {len(package_names)} unique package names across all sources.", file=sys.stderr)
-    return package_names
+    return dict(package_names)
 
 def get_sources_for_name(name, all_names_with_sources) -> str:
     """
     Returns the sources for a given name.
     """
     normalized_name = name.lower()
-    # Use .get() to avoid creating keys in defaultdict
-    sources = sorted(list(all_names_with_sources.get(normalized_name, set())))
+    sources = sorted(list(all_names_with_sources[normalized_name]))
     return sources
 
 def is_name_taken_global_index(name, all_names_with_sources) -> bool:
