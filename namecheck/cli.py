@@ -2,7 +2,7 @@ import sys
 from rich.style import Style
 from rich.prompt import Prompt
 from rich.console import Console
-from namecheck.render.const import PURPLE, PINK, BLUE
+from namecheck.render.const import PINK, BLUE
 from namecheck.utils import (get_all_package_names, 
                              render_name_availability,
                              get_name_availability)
@@ -25,8 +25,10 @@ def main():
     while True:
         try:
             if run_count == 0:
-                console.print(f"Enter a package name to check. Type [bold {PINK}]'q'[/] or [bold {PINK}]'exit'[/] to quit.", style=basic_style)
-                user_input = Prompt.ask(f"\n[{BLUE}]package name[/]", console=console)
+                msg = f"Enter a package name to check. Type [bold {PINK}]'q'[/] or [bold {PINK}]'exit'[/] to quit."
+                console.print(msg, style=basic_style)
+                package_prompt_msg = f"\n[{BLUE}]package name[/]"
+                user_input = Prompt.ask(package_prompt_msg, console=console)
 
             if user_input.lower() in ['q', 'exit']:
                 break
@@ -49,7 +51,7 @@ def main():
                                          all_package_names, 
                                          console=console)
                 ## offer user to check another name
-                user_input = Prompt.ask(f"\n[{BLUE}]package name[/]", console=console)
+                user_input = Prompt.ask(package_prompt_msg, console=console)
                 if user_input:
                     lines_to_clear = len(close_matches) + 5 
                     clear_previous_lines(lines_to_clear, sleep_time=0.01)

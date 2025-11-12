@@ -8,8 +8,7 @@ from bs4 import BeautifulSoup
 from collections import defaultdict
 from platformdirs import user_cache_dir
 from namecheck.render.utils import spinner
-from namecheck.render.utils import print_text
-from namecheck.render.const import PINK, PURPLE, CHECK, CROSS, GREEN, RED, ORANGE, BLUE
+from namecheck.render.const import GREEN, RED, ORANGE, BLUE
 from rich.style import Style
 
 # URLs for the simple package indexes
@@ -18,7 +17,6 @@ SOURCES = {
     'TestPyPI': 'https://test.pypi.org/'
 }
 
-# console = Console()
 basic_style = Style(color=BLUE, blink=False, bold=False)
 
 def load_package_names_from_cache():
