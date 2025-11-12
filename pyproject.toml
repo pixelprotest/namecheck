@@ -7,7 +7,7 @@ name = "namecheck"
 version = "2025.11.12rc1"
 description = "CLI tool to check the availability of a package name on PyPI and TestPyPI"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "pixelprotest", email = "hello@pixelprotest.com"}
@@ -15,14 +15,11 @@ authors = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Utilities",
     "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "beautifulsoup4>=4.14.2",
