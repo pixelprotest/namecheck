@@ -9,7 +9,7 @@ from collections import defaultdict
 from platformdirs import user_cache_dir
 from namecheck.render.utils import spinner
 from namecheck.render.utils import print_text
-from namecheck.render.const import PINK, PURPLE, CHECK, CROSS
+from namecheck.render.const import PINK, PURPLE, CHECK, CROSS, GREEN, RED, ORANGE, BLUE
 from rich.style import Style
 
 # URLs for the simple package indexes
@@ -18,7 +18,8 @@ SOURCES = {
     'TestPyPI': 'https://test.pypi.org/'
 }
 
-console = Console()
+# console = Console()
+basic_style = Style(color=BLUE, blink=False, bold=False)
 
 def load_package_names_from_cache():
     """
@@ -193,18 +194,16 @@ def render_name_availability(name, is_available, taken_sources, close_matches, a
 
 ## --- print output functions ---
 def print_available(name: str, console: Console):
-    plain_style = Style(color=PURPLE, blink=True, bold=False)
-    console.print(f"The name [bold {PINK}]'{name}'[/] appears to be [bold {PINK}]available![/]", style=plain_style)
+    console.print(f"The name [bold {GREEN}]'{name}'[/] appears to be [bold {GREEN}]available![/]", style=basic_style)
 
-def print_taken(name: str, source: list[str], console: Console):
-    sources = [f"[bold {PINK}]{source}[/]" for source in source]
-    sources = ", ".join(sorted(source))
-    print_text(f"The name [bold {PINK}]'{name}'[/] is already taken on: {sources}", console=console)
+def print_taken(name: str, sources: list[str], console: Console):
+    sources_w_color = [f"[bold {RED}]{x}[/]" for x in sources]
+    sources_str = ", ".join(sorted(sources_w_color))
+    console.print(f"The name [bold {RED}]'{name}'[/] is already taken on: {sources_str}", style=basic_style)
 
 def print_matches(matches: list[str], all_names_with_sources: dict[str, set[str]], console: Console):
-    plain_style = Style(color=PURPLE, blink=False, bold=False)
-    console.print("\nFound closely matching package names:", style=plain_style)
+    console.print("\nFound closely matching package names:", style=basic_style)
     for match in matches:
-        sources = [f"[{PINK}]{source}[/]" for source in sorted(list(all_names_with_sources[match]))]
+        sources = [f"[{ORANGE}]{source}[/]" for source in sorted(list(all_names_with_sources[match]))]
         sources = ", ".join(sources)
-        console.print(f"   - [bold {PINK}]{match}[/] (on: {sources})", style=plain_style)
+        console.print(f"   - [bold {ORANGE}]{match}[/] (on: {sources})", style=basic_style)

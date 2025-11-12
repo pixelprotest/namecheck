@@ -1,37 +1,46 @@
 import sys
-from namecheck.render.const import PURPLE, PINK
+from rich.style import Style
+from rich.prompt import Prompt
+from rich.console import Console
+from namecheck.render.const import PURPLE, PINK, BLUE
 from namecheck.utils import (get_all_package_names, 
                              render_name_availability,
                              get_name_availability)
-from rich.console import Console
-from rich.prompt import Prompt, Confirm
-from rich.style import Style
-from namecheck.render.utils import clear_previous_lines, print_text
+from namecheck.render.utils import clear_previous_lines
 
 console = Console()
+basic_style = Style(color=BLUE, blink=False, bold=False)
 
 def main():
     """
     Main function to run the package name checker.
     """
+    console.clear()
     all_package_names = get_all_package_names()
     if not all_package_names:
         print("Could not retrieve any package names. Exiting.", file=sys.stderr)
         return
 
+    run_count = 0
     while True:
         try:
-            console.clear()
-            console.print(f"[{PURPLE}]Enter a package name to check. Type [bold {PINK}]'q'[/] or [bold {PINK}]'exit'[/] to quit.[/]")
-            check_another_name = False
-            # user_input = input("\n> Check name: ")
-            user_input = Prompt.ask(f"\n[{PURPLE}]package name[/]", console=console)
+            if run_count == 0:
+                console.print(f"Enter a package name to check. Type [bold {PINK}]'q'[/] or [bold {PINK}]'exit'[/] to quit.", style=basic_style)
+                user_input = Prompt.ask(f"\n[{BLUE}]package name[/]", console=console)
+
             if user_input.lower() in ['q', 'exit']:
                 break
+
             if user_input:
-                clear_previous_lines(3)
-                print_text(f"Name availability for '{user_input}'", console=console)
+                if run_count == 0:
+                    clear_previous_lines(3)
+                else:
+                    clear_previous_lines(1)
+                
+                ## check for the name availability
+                console.print(f"Name availability for '{user_input}'", style=basic_style)
                 is_available, taken_sources, close_matches = get_name_availability(user_input, all_package_names)
+                ## now render the results
                 clear_previous_lines(2)
                 render_name_availability(user_input, 
                                          is_available, 
@@ -39,16 +48,17 @@ def main():
                                          close_matches, 
                                          all_package_names, 
                                          console=console)
-                # check_name_availability(user_input, all_package_names)
-                style = Style(color=PURPLE, blink=False, bold=False)
-                res = Prompt.ask(f"\n[{PURPLE}]Would you like to check another name?[/] \[[bold {PINK}]y[/]/[bold {PINK}]n[/]]", console=console)
-                check_another_name = True if res.lower() in ['y', 'yes'] else False
-                if check_another_name:
+                ## offer user to check another name
+                user_input = Prompt.ask(f"\n[{BLUE}]package name[/]", console=console)
+                if user_input:
+                    lines_to_clear = len(close_matches) + 5 
+                    clear_previous_lines(lines_to_clear, sleep_time=0.01)
+                    run_count += 1
                     continue
                 else:
                     break
         except (KeyboardInterrupt, EOFError):
-            print("\nExiting.")
+            console.print("\nExiting.", style=basic_style)
             break
 
 if __name__ == "__main__":

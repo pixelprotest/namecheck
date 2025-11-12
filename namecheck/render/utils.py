@@ -10,7 +10,7 @@ from rich.console import Group
 from rich.live import Live
 from namecheck.render.const import PINK, PURPLE, CHECK, CROSS, CLEAR_SLEEP, INDENT
 
-def clear_previous_lines(lines: int = 1, immediate: bool = False):
+def clear_previous_lines(lines: int = 1, immediate: bool = False, sleep_time: float = CLEAR_SLEEP):
     """Moves cursor up N lines and clears them."""
     for _ in range(lines):
         if lines > 1 and not immediate: 
