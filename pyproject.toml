@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "namecheck"
-version = "2025.11.11"
+version = "2025.11.12rc1"
 description = "CLI tool to check the availability of a package name on PyPI and TestPyPI"
 readme = "README.md"
 requires-python = ">=3.7"
