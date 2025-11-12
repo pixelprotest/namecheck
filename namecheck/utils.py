@@ -18,6 +18,7 @@ SOURCES = {
 }
 
 basic_style = Style(color=BLUE, blink=False, bold=False)
+blink_style = Style(color=BLUE, blink=True, bold=False)
 
 def load_package_names_from_cache():
     """
@@ -194,7 +195,7 @@ def render_name_availability(name, is_available, taken_sources, close_matches, a
 
 ## --- print output functions ---
 def print_available(name: str, console: Console):
-    console.print(f"The name [bold {GREEN}]'{name}'[/] appears to be [bold {GREEN}]available![/]", style=basic_style)
+    console.print(f"The name [bold {GREEN}]'{name}'[/] appears to be [bold {GREEN}]available![/]", style=blink_style)
 
 def print_taken(name: str, sources: list[str], console: Console):
     sources_w_color = [f"[bold {RED}]{x}[/]" for x in sources]
