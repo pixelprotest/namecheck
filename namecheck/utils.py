@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import pickle
 import difflib
 import requests
@@ -154,6 +155,7 @@ def get_name_availability(name, all_names_with_sources) -> tuple[bool, list[str]
     """
     Checks for an exact match and finds close matches, showing their sources.
     """
+    time.sleep(0.5)
     is_available = None
     taken_sources = []
     close_matches = []

@@ -718,7 +718,7 @@ wheels = [
 
 [[package]]
 name = "namecheck"
-version = "2025.11.11"
+version = "2025.11.12rc1"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
