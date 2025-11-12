@@ -2,7 +2,7 @@
 
 <p align="left" width="250">
     <a href="https://github.com/pixelprotest/namecheck/actions">
-        <img src="https://github.com/pixelprotest/namecheck/actions/workflows/tests.yml/badge.svg" alt="Build Status">
+        <img src="https://github.com/pixelprotest/namecheck/actions/workflows/tests.yml/badge.svg" alt="Tests Status">
     </a>
     <a href="">
         <img src="https://img.shields.io/github/v/release/pixelprotest/namecheck">
@@ -14,7 +14,7 @@
 
 CLI utility to check the availability of project names on PyPi and TestPyPi
 
-<img alt="Demo" width="100%" src="https://raw.githubusercontent.com/pixelprotest/namecheck/main/.github/demo.gif">
+<img alt="Demo" width="100%" src="https://raw.githubusercontent.com/pixelprotest/namecheck/main/.github/demo.gif" style="border-radius:20px">
 
 
 ## 📦 Installation
