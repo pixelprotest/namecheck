@@ -54,7 +54,7 @@ def main():
                 user_input = Prompt.ask(package_prompt_msg, console=console)
                 if user_input:
                     lines_to_clear = len(close_matches) + 5 
-                    clear_previous_lines(lines_to_clear, sleep_time=0.01)
+                    clear_previous_lines(lines_to_clear, sleep_time=0.05)
                     run_count += 1
                     continue
                 else:
