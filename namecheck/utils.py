@@ -86,7 +86,9 @@ def get_sources_for_name(name, all_names_with_sources) -> str:
     Returns the sources for a given name.
     """
     normalized_name = name.lower()
-    sources = sorted(list(all_names_with_sources[normalized_name]))
+    # Use .get() with default empty set to avoid KeyError
+    sources = sorted(list(all_names_with_sources.get(normalized_name, set())))
+    # sources = sorted(list(all_names_with_sources[normalized_name]))
     return sources
 
 def is_name_taken_global_index(name, all_names_with_sources) -> bool:

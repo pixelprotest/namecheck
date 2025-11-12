@@ -1,4 +1,4 @@
-# NameCheck 
+# namecheck
 
 <p align="left" width="250">
     <a href="https://github.com/pixelprotest/namecheck/actions">
@@ -23,7 +23,7 @@ pip install namecheck
 ```
 
 ## 🚀 Usage
-Then to run just launch
+Then to launch just run
 
 ```bash
 namecheck
