@@ -64,7 +64,7 @@ def clear_cache():
         return False
 
 @spinner("Fetching package names...")
-def get_all_package_names(console: Console, update_spinner=None):
+def get_all_package_names(update_spinner=None):
     """
     Fetches and parses package names from the given source URLs.
     Returns a dictionary mapping package names to a set of their sources.

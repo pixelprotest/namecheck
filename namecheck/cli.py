@@ -31,7 +31,7 @@ def main():
 
         
     console.clear()
-    all_package_names = get_all_package_names(console)
+    all_package_names = get_all_package_names()
     if not all_package_names:
         print("Could not retrieve any package names. Exiting.", file=sys.stderr)
         return
