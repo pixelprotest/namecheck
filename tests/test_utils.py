@@ -371,9 +371,11 @@ class TestIsNameTakenProjectUrl:
         assert result == []
 
     @patch('namecheck.utils.requests.get')
-    def test_is_name_taken_project_url_request_exception(self, mock_get, capsys):
+    @patch('namecheck.utils.get_content_with_playwright')
+    def test_is_name_taken_project_url_request_exception(self, mock_get, mock_playwright, capsys):
         """Test handling of request exceptions."""
         mock_get.side_effect = requests.RequestException("Connection error")
+        mock_playwright.side_effect = Exception("Playwright connection error")
         
         result = is_name_taken_project_url('test-package')
         

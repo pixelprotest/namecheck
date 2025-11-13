@@ -162,10 +162,10 @@ def is_name_taken_project_url(name) -> list:
                 html_content = response.content
                 response_status_code = response.status_code
 
-            if response.status_code == 200:
+            if response_status_code == 200:
                 # PyPI returns 200 even for non-existent packages
                 # Look for indicators that the package actually exists
-                soup = BeautifulSoup(response.content, 'html.parser')
+                soup = BeautifulSoup(html_content, 'html.parser')
                 
                 # Check if the error message is present
                 page_text = soup.get_text().lower()
@@ -177,8 +177,8 @@ def is_name_taken_project_url(name) -> list:
                 # PyPI has specific elements for real package pages
                 if soup.find('div', class_='package-header') or soup.find('div', class_='project-description'):
                     sources.append(source_name)
-        except requests.RequestException as e:
-            # If there's a network error, we can't determine if it's taken
+        except Exception as e:  # Changed from requests.RequestException to Exception
+            # If there's any error (network, Playwright, etc.), we can't determine if it's taken
             print(f"Warning: Could not check {source_name} for '{name}': {e}", file=sys.stderr)
     return sources
     
