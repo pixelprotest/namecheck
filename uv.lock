@@ -114,19 +114,6 @@ wheels = [
 ]
 
 [[package]]
-name = "check-availability"
-version = "0.1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "docopt" },
-    { name = "pastel" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/74/23/83c0805975feeee870f9fbfeec96697971a6f2ccf93712f5332b31163b66/check-availability-0.1.1.tar.gz", hash = "sha256:8ce8ebff90c43134a9270d2f5c43325073a117d620d3a790a292807bf4c0ccf5", size = 2917, upload-time = "2020-03-22T18:53:31.063Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/87/5b/0f57a6e7cb4d3962e885b66fe44aab5fa3d5a30a3b361590b3dcdfba57a6/check_availability-0.1.1-py3-none-any.whl", hash = "sha256:3b420316227bde496eeac83851e2d70dd1707e7759087084820031aa5a6efa79", size = 3716, upload-time = "2020-03-22T18:53:32.068Z" },
-]
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -240,12 +227,6 @@ toml = [
 ]
 
 [[package]]
-name = "docopt"
-version = "0.6.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491", size = 25901, upload-time = "2014-06-16T11:18:57.406Z" }
-
-[[package]]
 name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -298,11 +279,10 @@ wheels = [
 
 [[package]]
 name = "namecheck"
-version = "2025.11.13rc1"
+version = "2025.11.13rc2"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
-    { name = "check-availability" },
     { name = "platformdirs" },
     { name = "requests" },
     { name = "rich" },
@@ -317,7 +297,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.14.2" },
-    { name = "check-availability", specifier = ">=0.1.1" },
     { name = "platformdirs", specifier = ">=4.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4.4" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
@@ -333,15 +312,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f", size = 165727, upload-time = "2025-04-19T11:48:59.673Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484", size = 66469, upload-time = "2025-04-19T11:48:57.875Z" },
-]
-
-[[package]]
-name = "pastel"
-version = "0.2.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/76/f1/4594f5e0fcddb6953e5b8fe00da8c317b8b41b547e2b3ae2da7512943c62/pastel-0.2.1.tar.gz", hash = "sha256:e6581ac04e973cac858828c6202c1e1e81fee1dc7de7683f3e1ffe0bfd8a573d", size = 7555, upload-time = "2020-09-16T19:21:12.43Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/aa/18/a8444036c6dd65ba3624c63b734d3ba95ba63ace513078e1580590075d21/pastel-0.2.1-py2.py3-none-any.whl", hash = "sha256:4349225fcdf6c2bb34d483e523475de5bb04a5c10ef711263452cb37d7dd4364", size = 5955, upload-time = "2020-09-16T19:21:11.409Z" },
 ]
 
 [[package]]
