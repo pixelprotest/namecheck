@@ -8,7 +8,7 @@ from rich.console import Console
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from platformdirs import user_cache_dir
-from namecheck.render.utils import spinner
+from namecheck.render.utils import spinner, clear_previous_lines
 from namecheck.render.const import GREEN, RED, ORANGE, BLUE
 from rich.style import Style
 
@@ -49,7 +49,22 @@ def save_package_names_to_cache(package_names):
     with open(cache_file, 'wb') as f:
         pickle.dump(package_names, f)
 
-def get_all_package_names():
+def clear_cache():
+    """
+    Clears the package name cache.
+    """
+    cache_dir = user_cache_dir('namecheck')
+    cache_file = os.path.join(cache_dir, 'package_names.pkl')
+    if os.path.exists(cache_file):
+        os.remove(cache_file)
+        print("Cache cleared successfully.", file=sys.stderr)
+        return True
+    else:
+        print("No cache file found to clear.", file=sys.stderr)
+        return False
+
+@spinner("Fetching package names...")
+def get_all_package_names(update_spinner=None):
     """
     Fetches and parses package names from the given source URLs.
     Returns a dictionary mapping package names to a set of their sources.
@@ -63,7 +78,8 @@ def get_all_package_names():
     for source_name, url in SOURCES.items():
         index_url = url + 'simple/'
         try:
-            print(f"Fetching package list from {source_name} ({index_url})...", file=sys.stderr)
+            if update_spinner:
+                update_spinner(f"[{BLUE}]Fetching package list from {source_name} ({index_url})...[/]")
             response = requests.get(index_url, timeout=30)
             response.raise_for_status()
             
@@ -79,9 +95,18 @@ def get_all_package_names():
 
     ## save the package names to the cache
     save_package_names_to_cache(package_names)
+    
+    if update_spinner:
+        update_spinner(f"[{BLUE}]Found {len(package_names)} unique package names across all sources.[/]")
+        sleep_for_ux(3)
 
-    print(f"\nFound {len(package_names)} unique package names across all sources.", file=sys.stderr)
     return dict(package_names)
+
+def sleep_for_ux(sleep_time: float):
+    """ Sleeps for a given time to help UX, but skips when running in a test environment """
+    if 'pytest' in sys.modules:
+        return
+    time.sleep(sleep_time)
 
 def get_sources_for_name(name, all_names_with_sources) -> str:
     """
@@ -151,11 +176,11 @@ def get_close_matches(name, all_names_with_sources) -> list:
     return matches
 
 @spinner("Checking...")
-def get_name_availability(name, all_names_with_sources) -> tuple[bool, list[str], list[str]]:
+def get_name_availability(name, all_names_with_sources, update_spinner=None) -> tuple[bool, list[str], list[str]]:
     """
     Checks for an exact match and finds close matches, showing their sources.
     """
-    time.sleep(0.5)
+    sleep_for_ux(0.5)
     is_available = None
     taken_sources = []
     close_matches = []

@@ -23,12 +23,21 @@ def spinner(message: str, indent: bool = True):
     def decorator(func: callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            indent = Text(INDENT)
+            indent_text = Text(INDENT)
             spinner_obj = Spinner("dots", text=Text.from_markup(message), style=PINK)
             render_table = Table.grid()
-            render_table.add_row(indent, spinner_obj)
+            render_table.add_row(indent_text, spinner_obj)
 
-            with Live(render_table, refresh_per_second=10, transient=True):
+            # Create an update function
+            def update_spinner_text(new_message: str):
+                spinner_obj.update(text=Text.from_markup(new_message))
+                new_table = Table.grid()
+                new_table.add_row(indent_text, spinner_obj)
+                live.update(new_table)
+
+            with Live(render_table, refresh_per_second=10, transient=True) as live:
+                # Inject the update function into kwargs
+                kwargs['update_spinner'] = update_spinner_text
                 result = func(*args, **kwargs)
             return result
         return wrapper
