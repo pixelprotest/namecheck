@@ -17,7 +17,7 @@
 
 CLI utility to check the availability of project names on PyPi and TestPyPi
 
-<img alt="Demo" width="100%" src="https://raw.githubusercontent.com/pixelprotest/namecheck/main/.github/demo.gif">
+<img alt="Demo" width="100%" style="border-radius:20px;" src="https://raw.githubusercontent.com/pixelprotest/namecheck/main/.github/demo.gif">
 
 
 ## 📦 Installation
