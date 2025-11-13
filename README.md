@@ -19,15 +19,16 @@ CLI utility to check the availability of project names on PyPi and TestPyPi
 
 <img alt="Demo" width="100%" style="border-radius:20px;" src="https://raw.githubusercontent.com/pixelprotest/namecheck/main/.github/demo.gif">
 
-
 ## 📦 Installation
-Simple pip installation
+Simple pip install
 ```
 pip install namecheck
 ```
 
+_* Note since TestPyPi blocks non-javascript requests, some of the direct project lookups are done using [playwright-python](https://github.com/microsoft/playwright-python). After installing `namecheck`, it will ask you to install playwright on your system._
+
 ## 🚀 Usage
-Then to launch just run
+To launch just run
 
 ```bash
 namecheck
