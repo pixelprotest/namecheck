@@ -8,6 +8,7 @@ from rich.console import Console
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from platformdirs import user_cache_dir
+from playwright.sync_api import sync_playwright
 from namecheck.render.utils import spinner, clear_previous_lines
 from namecheck.render.const import GREEN, RED, ORANGE, BLUE
 from rich.style import Style
@@ -108,6 +109,7 @@ def sleep_for_ux(sleep_time: float):
         return
     time.sleep(sleep_time)
 
+
 def get_sources_for_name(name, all_names_with_sources) -> str:
     """
     Returns the sources for a given name.
@@ -127,6 +129,20 @@ def is_name_taken_global_index(name, all_names_with_sources) -> bool:
     found = True if normalized_name in all_names_with_sources else False
     return found
 
+def get_content_with_playwright(url: str) -> str:
+    """
+    Fetches the content of a URL using Playwright to handle JavaScript rendering.
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        try:
+            page.goto(url, wait_until='networkidle')
+            content = page.content()
+        finally:
+            browser.close()
+    return content
+
 def is_name_taken_project_url(name) -> list:
     """
     Instead of checking the global index, we check the project URL directly.
@@ -138,7 +154,14 @@ def is_name_taken_project_url(name) -> list:
     for source_name, url in SOURCES.items():
         project_url = f"{url}project/{name}/"
         try:
-            response = requests.get(project_url, timeout=30)
+            if source_name == 'TestPyPI':
+                html_content = get_content_with_playwright(project_url)
+                response_status_code = 200  # Assume success if Playwright returns content
+            else:
+                response = requests.get(project_url, timeout=30)
+                html_content = response.content
+                response_status_code = response.status_code
+
             if response.status_code == 200:
                 # PyPI returns 200 even for non-existent packages
                 # Look for indicators that the package actually exists
