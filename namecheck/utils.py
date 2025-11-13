@@ -98,9 +98,15 @@ def get_all_package_names(update_spinner=None):
     
     if update_spinner:
         update_spinner(f"[{BLUE}]Found {len(package_names)} unique package names across all sources.[/]")
-        time.sleep(3)
+        sleep_for_ux(3)
 
     return dict(package_names)
+
+def sleep_for_ux(sleep_time: float):
+    """ Sleeps for a given time to help UX, but skips when running in a test environment """
+    if 'pytest' in sys.modules:
+        return
+    time.sleep(sleep_time)
 
 def get_sources_for_name(name, all_names_with_sources) -> str:
     """
@@ -174,7 +180,7 @@ def get_name_availability(name, all_names_with_sources, update_spinner=None) -> 
     """
     Checks for an exact match and finds close matches, showing their sources.
     """
-    time.sleep(0.5)
+    sleep_for_ux(0.5)
     is_available = None
     taken_sources = []
     close_matches = []
