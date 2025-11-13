@@ -10,8 +10,8 @@
     <a href="">
         <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue">
     </a>
-    <a href="">
-        <img src="https://img.shields.io/github/license/pixelprotest/namecheck?label=license&style=flat">
+    <a href="https://github.com/pixelprotest/namecheck/blob/main/LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-blue?style=flat">
     </a>
 </p>
 
