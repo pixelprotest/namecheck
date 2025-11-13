@@ -33,6 +33,12 @@ Then to launch just run
 namecheck
 ```
 
+To speed up launch times, the app stores the package names from PyPi and TestPyPi into a cache. If you pass in the `--refresh` flag, it will clear this cache and do a fresh lookup.
+
+```bash
+namecheck --refresh
+```
+
 ## License
 
 MIT License. This project is for personal use.
