@@ -13,6 +13,7 @@ from rich.console import Console
 from namecheck.utils import (
     load_package_names_from_cache,
     save_package_names_to_cache,
+    clear_cache,
     get_all_package_names,
     get_sources_for_name,
     is_name_taken_global_index,
@@ -105,6 +106,68 @@ class TestCacheFunctions:
         mock_makedirs.assert_called_once_with('/fake/cache/dir', exist_ok=True)
         mock_open.assert_called_once_with('/fake/cache/dir/package_names.pkl', 'wb')
         mock_pickle_dump.assert_called_once()
+
+    @patch('namecheck.utils.user_cache_dir')
+    @patch('os.path.exists')
+    @patch('os.remove')
+    def test_clear_cache_success(self, mock_remove, mock_exists, mock_cache_dir, capsys):
+        """Test successfully clearing the cache when cache file exists."""
+        mock_cache_dir.return_value = '/fake/cache/dir'
+        mock_exists.return_value = True
+        
+        result = clear_cache()
+        
+        assert result is True
+        mock_exists.assert_called_once_with('/fake/cache/dir/package_names.pkl')
+        mock_remove.assert_called_once_with('/fake/cache/dir/package_names.pkl')
+        
+        captured = capsys.readouterr()
+        assert "Cache cleared successfully" in captured.err
+
+    @patch('namecheck.utils.user_cache_dir')
+    @patch('os.path.exists')
+    @patch('os.remove')
+    def test_clear_cache_no_file(self, mock_remove, mock_exists, mock_cache_dir, capsys):
+        """Test clearing cache when cache file doesn't exist."""
+        mock_cache_dir.return_value = '/fake/cache/dir'
+        mock_exists.return_value = False
+        
+        result = clear_cache()
+        
+        assert result is False
+        mock_exists.assert_called_once_with('/fake/cache/dir/package_names.pkl')
+        mock_remove.assert_not_called()
+        
+        captured = capsys.readouterr()
+        assert "No cache file found to clear" in captured.err
+
+    @patch('namecheck.utils.user_cache_dir')
+    @patch('os.path.exists')
+    @patch('os.remove')
+    def test_clear_cache_remove_error(self, mock_remove, mock_exists, mock_cache_dir):
+        """Test handling of errors when removing cache file."""
+        mock_cache_dir.return_value = '/fake/cache/dir'
+        mock_exists.return_value = True
+        mock_remove.side_effect = OSError("Permission denied")
+        
+        with pytest.raises(OSError):
+            clear_cache()
+        
+        mock_remove.assert_called_once_with('/fake/cache/dir/package_names.pkl')
+
+    @patch('namecheck.utils.user_cache_dir')
+    @patch('os.path.exists')
+    @patch('os.remove')
+    def test_clear_cache_correct_path_construction(self, mock_remove, mock_exists, mock_cache_dir):
+        """Test that the cache file path is correctly constructed."""
+        mock_cache_dir.return_value = '/custom/cache/location'
+        mock_exists.return_value = True
+        
+        clear_cache()
+        
+        expected_path = '/custom/cache/location/package_names.pkl'
+        mock_exists.assert_called_once_with(expected_path)
+        mock_remove.assert_called_once_with(expected_path)
 
 
 class TestGetAllPackageNames:
