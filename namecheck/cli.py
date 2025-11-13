@@ -1,11 +1,13 @@
 import sys
+import argparse
 from rich.style import Style
 from rich.prompt import Prompt
 from rich.console import Console
 from namecheck.render.const import PINK, BLUE
 from namecheck.utils import (get_all_package_names, 
                              render_name_availability,
-                             get_name_availability)
+                             get_name_availability,
+                             clear_cache)
 from namecheck.render.utils import clear_previous_lines
 
 console = Console()
@@ -15,8 +17,21 @@ def main():
     """
     Main function to run the package name checker.
     """
+    parser = argparse.ArgumentParser(
+        description="CLI tool to check the availability of a package name on PyPI and TestPyPI."
+    )
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="Clear the cached package names."
+    )
+    args = parser.parse_args()
+    if args.refresh:
+        clear_cache()
+
+        
     console.clear()
-    all_package_names = get_all_package_names()
+    all_package_names = get_all_package_names(console)
     if not all_package_names:
         print("Could not retrieve any package names. Exiting.", file=sys.stderr)
         return
